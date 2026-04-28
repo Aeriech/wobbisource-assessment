@@ -32,7 +32,7 @@ export default function PinList() {
           className="p-4 bg-gray-50 border rounded-lg hover:shadow-md transition-shadow group relative"
         >
           <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
+            <MapPin className="w-5 h-5 text-blue-500 mt-1 shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-900 leading-tight">
                 {pin.address}

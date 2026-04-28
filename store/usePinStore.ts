@@ -15,10 +15,11 @@ export const usePinStore = create<PinState>()(
     (set) => ({
       pins: [],
       addPin: (pin) => set((state) => ({ pins: [...state.pins, pin] })),
+      
       removePin: (id) => set((state) => ({ 
         pins: state.pins.filter((p) => p.id !== id) 
       })),
-      // Add this new function:
+      
       updatePin: (id, updatedFields) => set((state) => ({
         pins: state.pins.map((p) => p.id === id ? { ...p, ...updatedFields } : p)
       })),
