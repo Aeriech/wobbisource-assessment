@@ -28,7 +28,9 @@ export default function PinList() {
           className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-inner">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-inner"
+              onClick={() => setMapCenter(pin.lat, pin.lng)}
+            >
               <MapPin className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
