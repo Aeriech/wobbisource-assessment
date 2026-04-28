@@ -2,10 +2,10 @@
 
 import type { LeafletMouseEvent } from 'leaflet';
 import type { Pin } from '@/types/pin';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { usePinStore } from '@/store/usePinStore';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 const markerIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -66,13 +66,25 @@ function DraggableMarker({ pin }: { pin: Pin }) {
   );
 }
 
+function MapCenter() {
+  const map = useMap();
+  const center = usePinStore((state) => state.center);
+
+  useEffect(() => {
+    map.setView([center.lat, center.lng], map.getZoom(), { animate: true });
+  }, [center.lat, center.lng, map]);
+
+  return null;
+}
+
 export default function Map() {
   const pins = usePinStore((state) => state.pins);
+  const center = usePinStore((state) => state.center);
 
   return (
     <div className="h-full w-full bg-slate-100">
       <MapContainer
-        center={[16.4023, 120.5960]}
+        center={[center.lat, center.lng]}
         zoom={13}
         className="h-full w-full"
       >
@@ -81,6 +93,7 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapEvents />
+        <MapCenter />
         {pins.map((pin) => (
           <DraggableMarker key={pin.id} pin={pin} />
         ))}

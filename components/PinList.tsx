@@ -7,6 +7,7 @@ import { Trash2, MapPin } from 'lucide-react';
 export default function PinList() {
   const pins = usePinStore((state) => state.pins);
   const removePin = usePinStore((state) => state.removePin);
+  const setMapCenter = usePinStore((state) => state.setMapCenter);
 
   if (pins.length === 0) {
     return (
@@ -31,9 +32,15 @@ export default function PinList() {
               <MapPin className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-900 line-clamp-2">
-                {pin.address}
-              </p>
+              <button
+                type="button"
+                onClick={() => setMapCenter(pin.lat, pin.lng)}
+                className="w-full text-left"
+              >
+                <p className="text-sm font-semibold text-slate-900 line-clamp-2 transition hover:text-slate-700">
+                  {pin.address}
+                </p>
+              </button>
               <p className="mt-2 text-xs text-slate-500 font-mono">
                 {pin.lat.toFixed(4)}, {pin.lng.toFixed(4)}
               </p>

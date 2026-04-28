@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { MapPin, X } from 'lucide-react';
 import PinList from '@/components/PinList';
 import ColourfulText from '@/components/ui/colourful-text';
-import Map from '@/components/Map';
+const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 
 export default function Home() {
   const [sheetOpen, setSheetOpen] = useState(false);
