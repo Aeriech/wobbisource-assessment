@@ -1,19 +1,12 @@
 'use client';
 
+import type { Pin } from '@/types/pin';
 import { usePinStore } from '@/store/usePinStore';
 import { Trash2, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 export default function PinList() {
-  const [mounted, setMounted] = useState(false);
-  const { pins, removePin } = usePinStore();
-
-  // Wait until the component is mounted on the client to show the pins
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  const pins = usePinStore((state) => state.pins);
+  const removePin = usePinStore((state) => state.removePin);
 
   if (pins.length === 0) {
     return (
@@ -26,9 +19,9 @@ export default function PinList() {
 
   return (
     <div className="space-y-4">
-      {pins.map((pin) => (
-        <div 
-          key={pin.id} 
+      {pins.map((pin: Pin) => (
+        <div
+          key={pin.id}
           className="p-4 bg-gray-50 border rounded-lg hover:shadow-md transition-shadow group relative"
         >
           <div className="flex items-start gap-3">
@@ -42,6 +35,7 @@ export default function PinList() {
               </p>
             </div>
             <button
+              type="button"
               onClick={() => removePin(pin.id)}
               className="p-2 text-gray-400 hover:text-red-600 transition-colors"
               title="Delete Pin"

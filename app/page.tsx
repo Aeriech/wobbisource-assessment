@@ -1,13 +1,7 @@
 'use client';
-import dynamic from 'next/dynamic';
 import PinList from '@/components/PinList';
 import ColourfulText from '@/components/ui/colourful-text';
-
-// We import the Map component dynamically so it only loads on the client side
-const Map = dynamic(() => import('@/components/Map'), {
-  ssr: false,
-  loading: () => <div className="h-full w-full bg-gray-100 animate-pulse" />,
-});
+import Map from '@/components/Map';
 
 export default function Home() {
   return (

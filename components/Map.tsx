@@ -1,92 +1,73 @@
 'use client';
 
+import type { LeafletMouseEvent } from 'leaflet';
+import type { Pin } from '@/types/pin';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { usePinStore } from '@/store/usePinStore';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 
-// Fix for default Leaflet icon
-const icon = L.icon({
+const markerIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
 
-// Logic for clicking the map to add a new pin
-function MapEvents() {
-  const addPin = usePinStore((state) => state.addPin);
-
-  useMapEvents({
-    click: async (e) => {
-      const { lat, lng } = e.latlng;
-      const address = await fetchAddress(lat, lng);
-      addPin({ id: crypto.randomUUID(), lat, lng, address });
-    },
-  });
-  return null;
-}
-
-// Helper function for geocoding (required by assessment) 
 async function fetchAddress(lat: number, lng: number) {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
     );
     const data = await res.json();
-    return data.display_name || "Unknown Address";
+    return data.display_name || 'Unknown Address';
   } catch {
-    return "Error fetching address";
+    return 'Error fetching address';
   }
 }
 
-function DraggableMarker({ pin }: { pin: any }) {
+function MapEvents() {
+  const addPin = usePinStore((state) => state.addPin);
+
+  const handleClick = useCallback(
+    async (event: LeafletMouseEvent) => {
+      const { lat, lng } = event.latlng;
+      const address = await fetchAddress(lat, lng);
+      addPin({ id: crypto.randomUUID(), lat, lng, address });
+    },
+    [addPin]
+  );
+
+  useMapEvents({ click: handleClick });
+  return null;
+}
+
+function DraggableMarker({ pin }: { pin: Pin }) {
   const updatePin = usePinStore((state) => state.updatePin);
   const markerRef = useRef<L.Marker>(null);
 
-  const eventHandlers = useMemo(
-    () => ({
-      async dragend() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          const newPos = marker.getLatLng();
-          // Fetch new address based on dropped location
-          const newAddress = await fetchAddress(newPos.lat, newPos.lng);
-          
-          // Update the store
-          updatePin(pin.id, { 
-            lat: newPos.lat, 
-            lng: newPos.lng, 
-            address: newAddress 
-          });
-        }
-      },
-    }),
-    [pin.id, updatePin]
-  );
+  const handleDragEnd = useCallback(async () => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    const { lat, lng } = marker.getLatLng();
+    const address = await fetchAddress(lat, lng);
+    updatePin(pin.id, { lat, lng, address });
+  }, [pin.id, updatePin]);
 
   return (
     <Marker
-      draggable={true}
-      eventHandlers={eventHandlers}
+      draggable
       position={[pin.lat, pin.lng]}
-      icon={icon}
+      icon={markerIcon}
       ref={markerRef}
+      eventHandlers={{ dragend: handleDragEnd }}
     />
   );
 }
 
 export default function Map() {
   const pins = usePinStore((state) => state.pins);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  if (!hasMounted) {
-    return null;
-  }
 
   return (
     <MapContainer
