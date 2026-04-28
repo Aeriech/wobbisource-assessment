@@ -1,13 +1,70 @@
 'use client';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MapPin, X } from 'lucide-react';
+import { MapPin, Search, X } from 'lucide-react';
 import PinList from '@/components/PinList';
 import ColourfulText from '@/components/ui/colourful-text';
+import { usePinStore } from '@/store/usePinStore';
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
+
+type SearchResult = {
+  place_id: string;
+  display_name: string;
+  lat: string;
+  lon: string;
+};
 
 export default function Home() {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+  const addPin = usePinStore((state) => state.addPin);
+  const setMapCenter = usePinStore((state) => state.setMapCenter);
+
+  async function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!query.trim()) return;
+
+    setSearching(true);
+    setSearchError('');
+    setSearchResults([]);
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=6`
+      );
+      const results: SearchResult[] = await response.json();
+
+      if (!Array.isArray(results) || results.length === 0) {
+        setSearchError('No matching locations found. Try a different search term.');
+      } else {
+        setSearchResults(results);
+      }
+    } catch (error) {
+      setSearchError('Unable to search locations right now. Please try again.');
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function handleSelectLocation(location: SearchResult) {
+    const lat = Number(location.lat);
+    const lng = Number(location.lon);
+    const pin = {
+      id: crypto.randomUUID(),
+      lat,
+      lng,
+      address: location.display_name,
+    };
+
+    addPin(pin);
+    setMapCenter(lat, lng);
+    setSearchResults([]);
+    setQuery('');
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -34,6 +91,52 @@ export default function Home() {
               View pins
             </button>
           </div>
+
+          <form onSubmit={handleSearch} className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <label className="sr-only" htmlFor="location-search">
+              Search for a location
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                id="location-search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="w-full rounded-3xl border border-slate-200/90 bg-white/95 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                placeholder="Search for a city, address or landmark"
+              />
+            </div>
+            <button
+              type="submit"
+              className="inline-flex h-12 items-center justify-center rounded-3xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={searching}
+            >
+              {searching ? 'Searching…' : 'Search location'}
+            </button>
+          </form>
+
+          {(searchResults.length > 0 || searchError) && (
+            <div className="mt-4 rounded-3xl border border-slate-200/90 bg-slate-50 p-4 shadow-sm">
+              <p className="mb-3 text-sm font-semibold text-slate-900">Search results</p>
+              {searchError ? (
+                <p className="text-sm text-rose-600">{searchError}</p>
+              ) : (
+                <div className="space-y-2">
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.place_id}
+                      type="button"
+                      onClick={() => handleSelectLocation(result)}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                    >
+                      <p className="font-semibold text-slate-900">{result.display_name}</p>
+                      <p className="mt-1 text-xs text-slate-500">Lat {Number(result.lat).toFixed(4)}, Lon {Number(result.lon).toFixed(4)}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid flex-1 gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
