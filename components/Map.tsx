@@ -70,19 +70,21 @@ export default function Map() {
   const pins = usePinStore((state) => state.pins);
 
   return (
-    <MapContainer
-      center={[16.4023, 120.5960]}
-      zoom={13}
-      style={{ height: '100%', width: '100%' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <MapEvents />
-      {pins.map((pin) => (
-        <DraggableMarker key={pin.id} pin={pin} />
-      ))}
-    </MapContainer>
+    <div className="h-full w-full bg-slate-100">
+      <MapContainer
+        center={[16.4023, 120.5960]}
+        zoom={13}
+        className="h-full w-full"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MapEvents />
+        {pins.map((pin) => (
+          <DraggableMarker key={pin.id} pin={pin} />
+        ))}
+      </MapContainer>
+    </div>
   );
 }

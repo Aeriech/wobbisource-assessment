@@ -124,6 +124,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(circle at top left, rgb(59 130 246 / 0.12), transparent 28%),
+      radial-gradient(circle at bottom right, rgb(139 92 246 / 0.14), transparent 32%);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;

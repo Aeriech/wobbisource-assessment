@@ -10,9 +10,11 @@ export default function PinList() {
 
   if (pins.length === 0) {
     return (
-      <div className="text-center py-10 text-gray-500">
-        <p>No pins dropped yet.</p>
-        <p className="text-sm">Click the map to start pinning!</p>
+      <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-slate-300/80 bg-slate-50/80 p-8 text-center text-slate-500 shadow-sm">
+        <div>
+          <p className="text-lg font-medium text-slate-700">No pins dropped yet.</p>
+          <p className="mt-2 text-sm text-slate-500">Tap the map to start saving locations.</p>
+        </div>
       </div>
     );
   }
@@ -22,26 +24,30 @@ export default function PinList() {
       {pins.map((pin: Pin) => (
         <div
           key={pin.id}
-          className="p-4 bg-gray-50 border rounded-lg hover:shadow-md transition-shadow group relative"
+          className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
         >
-          <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-blue-500 mt-1 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900 leading-tight">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-inner">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900 line-clamp-2">
                 {pin.address}
               </p>
-              <p className="text-xs text-gray-500 mt-1 font-mono">
+              <p className="mt-2 text-xs text-slate-500 font-mono">
                 {pin.lat.toFixed(4)}, {pin.lng.toFixed(4)}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => removePin(pin.id)}
-              className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-              title="Delete Pin"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => removePin(pin.id)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                title="Delete Pin"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       ))}
