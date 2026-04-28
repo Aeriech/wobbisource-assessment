@@ -2,9 +2,18 @@
 
 import { usePinStore } from '@/store/usePinStore';
 import { Trash2, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function PinList() {
+  const [mounted, setMounted] = useState(false);
   const { pins, removePin } = usePinStore();
+
+  // Wait until the component is mounted on the client to show the pins
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   if (pins.length === 0) {
     return (
